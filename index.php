@@ -1,3 +1,16 @@
+
+<?php
+session_start();
+
+// Verifica si el usuario está autenticado
+if (!isset($_SESSION['username'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Verifica el rol del usuario
+$role = $_SESSION['role'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

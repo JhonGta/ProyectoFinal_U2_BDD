@@ -1,6 +1,22 @@
 <?php
+
+session_start();
+
+// Verificar si el usuario ha iniciado sesión
+if (!isset($_SESSION['username'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Verificar permisos basados en el rol
+if ($_SESSION['role'] !== 'usuario_admin' && $_SESSION['role'] !== 'usuario_ventas') {
+    echo "<p>Acceso denegado.</p>";
+    exit;
+}
+
+
 // Conexión a la base de datos
-$host = '192.168.7.158';
+$host = '192.168.100.161';
 $db = 'flores';
 $user = 'Postgres1';
 $password = '1234';

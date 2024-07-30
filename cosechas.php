@@ -21,7 +21,23 @@
     </nav>
 
     <?php
-    $host = '192.168.7.158';
+session_start();
+
+// Verifica si el usuario está autenticado
+if (!isset($_SESSION['username'])) {
+    header('Location: login.php');
+    exit;
+}
+
+// Verifica el rol del usuario
+$role = $_SESSION['role'];
+if ($role != 'usuario_admin' && $role != 'usuario_produccion') {
+    echo "<p>Acceso denegado.</p>";
+    exit;
+}
+
+
+    $host = '192.168.100.161';
     $db = 'flores';
     $user = 'Postgres1';
     $password = '1234';
