@@ -21,20 +21,20 @@
     </nav>
 
     <?php
-    session_start();
+     session_start();
 
-    // Verifica si el usuario está autenticado
-    if (!isset($_SESSION['username'])) {
-        header('Location: login.php');
-        exit;
-    }
+     // Verifica si el usuario está autenticado
+     if (!isset($_SESSION['username'])) {
+         header('Location: login.php');
+         exit;
+     }
     
-    // Verifica el rol del usuario
-    $role = $_SESSION['role'];
-    if ($role != 'usuario_admin' && $role != 'usuario_produccion') {
-        echo "<p>Acceso denegado.</p>";
-        exit;
-    }
+     // Verifica el rol del usuario
+     $role = $_SESSION['role'];
+     if ($role != 'usuario_admin' && $role != 'usuario_produccion') {
+         echo "<p>Acceso denegado.</p>";
+         exit;
+     }
 
 
     $host = '192.168.100.161';
