@@ -17,6 +17,7 @@
             <li><a href="exportaciones.php">Exportaciones</a></li>
             <li><a href="empleados.php">Empleados</a></li>
             <li><a href="facturacion.php">Facturación</a></li>
+            <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
 
@@ -38,7 +39,7 @@ if ($role != 'usuario_admin' && $role != 'usuario_produccion') {
 }
 
     
-    $host = '192.168.100.161';
+    $host = '192.168.7.158';
     $db = 'flores';
     $user = 'Postgres1';
     $password = '1234';

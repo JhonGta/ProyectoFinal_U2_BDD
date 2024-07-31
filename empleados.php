@@ -17,6 +17,7 @@
             <li><a href="exportaciones.php">Exportaciones</a></li>
             <li><a href="empleados.php">Empleados</a></li>
             <li><a href="facturacion.php">Facturación</a></li>
+            <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
 
@@ -31,21 +32,18 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Verifica el rol del usuario
-$role = $_SESSION['role'];
-if ($role != 'usuario_admin' && $role != 'usuario_produccion') {
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
+if ($role != 'usuario_admin') {
     echo "<p>Acceso denegado.</p>";
     exit;
 }
 
-
-
-    $host = '192.168.100.161';
-    $db = 'flores';
-    $user = 'Postgres1';
-    $password = '1234';
-
-    $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
-
+// Configuración de la conexión a la base de datos
+$host = '192.168.7.158';
+$db = 'flores';
+$user = ($role == 'usuario_admin') ? 'usuario_admin' : 'usuario_produccion';
+$password = ($role == 'usuario_admin') ? 'admin_1234' : 'produccion_1234';
+$dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
     try {
         $pdo = new PDO($dsn);
 

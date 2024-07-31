@@ -2,24 +2,24 @@
 
 session_start();
 
-// Verificar si el usuario ha iniciado sesión
+// Verifica si el usuario está autenticado
 if (!isset($_SESSION['username'])) {
     header('Location: login.php');
     exit;
 }
 
-// Verificar permisos basados en el rol
-if ($_SESSION['role'] !== 'usuario_admin' && $_SESSION['role'] !== 'usuario_ventas') {
+// Verifica el rol del usuario
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
+if ($role != 'usuario_admin' && $role != 'usuario_ventas') {
     echo "<p>Acceso denegado.</p>";
     exit;
 }
 
-
-// Conexión a la base de datos
-$host = '192.168.100.161';
+// Configuración de la conexión a la base de datos
+$host = '192.168.7.158';
 $db = 'flores';
-$user = 'Postgres1';
-$password = '1234';
+$user = ($role == 'usuario_admin') ? 'usuario_admin' : 'usuario_ventas';
+$password = ($role == 'usuario_admin') ? 'admin_1234' : 'ventas_1234';
 $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
 
 try {
@@ -127,6 +127,7 @@ try {
             <li><a href="exportaciones.php">Exportaciones</a></li>
             <li><a href="empleados.php">Empleados</a></li>
             <li><a href="facturacion.php">Facturación</a></li>
+            <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
 

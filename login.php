@@ -2,7 +2,7 @@
 session_start();
 
 // Configuración de la conexión a la base de datos
-$host = '192.168.100.161';
+$host = '192.168.7.158';
 $db = 'flores';
 $user = 'Postgres1';
 $password = '1234';
