@@ -34,7 +34,7 @@ services:
     image: wrouesnel/postgres_exporter
     container_name: postgres_exporter
     environment:
-      DATA_SOURCE_NAME: "postgresql://Postgres1:1234@192.168.7.158:5432/flores?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://Postgres1:1234@10.241.0.61:5432/flores?sslmode=disable"
     ports:
       - "9187:9187"
 

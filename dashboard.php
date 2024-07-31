@@ -23,4 +23,4 @@ if ($_SESSION['role'] == 'usuario_admin') {
 } else {
     echo "<p>Acceso denegado.</p>";
 }
-?>
+?>/* crontap */

@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Flores</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/esti.css">
 </head>
 <body>
-    <h2>Flores</h2>
-    <nav>
+<header class="header">
+        <div class="logo">
+            <img src="logo.png" alt="Florería Elegante">
+        </div>
+        <nav class="nav">
         <ul>
             <li><a href="index.php">Inicio</a></li>
             <li><a href="flores.php">Flores</a></li>
@@ -19,9 +22,9 @@
             <li><a href="facturacion.php">Facturación</a></li>
             <li><a href="logout.php">Salir</a></li>
         </ul>
-        
-        
     </nav>
+
+    </header>
 
     <?php
 session_start();
@@ -40,7 +43,7 @@ if ($role != 'usuario_admin' && $role != 'usuario_produccion') {
 }
 
 // Configuración de la conexión a la base de datos
-$host = '192.168.7.158';
+$host = '10.241.0.61';
 $db = 'flores';
 $user = ($role == 'usuario_admin') ? 'usuario_admin' : 'usuario_produccion';
 $password = ($role == 'usuario_admin') ? 'admin_1234' : 'produccion_1234';
@@ -49,7 +52,14 @@ $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
         $pdo = new PDO($dsn);
 
         if ($pdo) {
-            echo "<p>Conexión exitosa a la base de datos $db!</p>";
+            
+if (isset($message)) {
+    echo "<div class='alert alert-success'>$message</div>";
+}
+if (isset($error)) {
+    echo "<div class='alert alert-error'>$error</div>";
+}
+
 
             // Manejo de inserción
             if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['nombre']) && !isset($_POST['update_id'])) {
@@ -136,8 +146,7 @@ $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
                         <form method='post' action='flores.php' style='display:inline-block;'>
                             <input type='hidden' name='edit_id' value='" . htmlspecialchars($row['id']) . "'>
                             <input type='submit' value='Editar'>
-                        </form>
-                        <form method='post' action='flores.php' style='display:inline-block;'>
+                        
                             <input type='hidden' name='delete_id' value='" . htmlspecialchars($row['id']) . "'>
                             <input type='submit' value='Eliminar'>
                         </form>
@@ -154,14 +163,14 @@ $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
         echo "<p>Error: " . $e->getMessage() . "</p>";
     }
     ?>
-
+<div id="editar">
     <?php if (isset($flor)): ?> 
-    <h2>Editar Flor</h2>
+    
     <form method="post" action="">
+    <h2>Editar Flor</h2>
         <input type="hidden" name="update_id" value="<?php echo htmlspecialchars($flor['id']); ?>">
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre" value="<?php echo htmlspecialchars($flor['nombre']); ?>" required>
-        <br>
         <label for="tipo_id">Tipo:</label>
         <select id="tipo_id" name="tipo_id" required>
             <?php
@@ -186,9 +195,12 @@ $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
         <input type="submit" value="Actualizar">
     </form>
     <?php endif; ?>
+    </div>
 
-    <h2>Insertar Nueva Flor</h2>
+
+    <div id="insertar">
     <form method="post" action="">
+    <h2>Insertar Nueva Flor</h2>
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre" required>
         <br>
@@ -214,5 +226,6 @@ $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
         <br>
         <input type="submit" value="Insertar">
     </form>
+    </div>
 </body>
 </html>

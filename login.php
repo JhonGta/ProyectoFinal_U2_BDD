@@ -2,7 +2,7 @@
 session_start();
 
 // Configuración de la conexión a la base de datos
-$host = '192.168.7.158';
+$host = '10.241.0.61';
 $db = 'flores';
 $user = 'Postgres1';
 $password = '1234';
@@ -39,11 +39,14 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styl.css">
     <title>Login</title>
 </head>
 <body>
-    <h2>Iniciar sesión</h2>
+    
     <form method="post" action="">
+    <h2>Iniciar sesión</h2>
+    <br>
         <label for="username">Nombre de Usuario:</label>
         <input type="text" id="username" name="username" required>
         <br>

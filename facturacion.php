@@ -16,7 +16,7 @@ if ($role != 'usuario_admin' && $role != 'usuario_ventas') {
 }
 
 // Configuración de la conexión a la base de datos
-$host = '192.168.7.158';
+$host = '10.241.0.61';
 $db = 'flores';
 $user = ($role == 'usuario_admin') ? 'usuario_admin' : 'usuario_ventas';
 $password = ($role == 'usuario_admin') ? 'admin_1234' : 'ventas_1234';

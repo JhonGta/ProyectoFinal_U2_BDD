@@ -39,7 +39,7 @@ if ($role != 'usuario_admin' && $role != 'usuario_produccion') {
 }
 
     
-    $host = '192.168.7.158';
+    $host = '10.241.0.61';
     $db = 'flores';
     $user = 'Postgres1';
     $password = '1234';
