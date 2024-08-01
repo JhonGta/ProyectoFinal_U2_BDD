@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Exportaciones</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/esti.css">
     <script>
     function actualizarPrecioTotal() {
         var produccionSelect = document.getElementById("produccion_id");
@@ -22,9 +22,13 @@
 </head>
 <body>
     <h2>Exportaciones</h2>
-    <nav>
+    <header class="header">
+        <div class="logo">
+            <img src="img/logo.png" alt="Florería Elegante">
+        </div>
+        <nav class="nav">
         <ul>
-            <li><a href="index.php">Inicio</a></li>
+            <li><a href="inicio1.html">Inicio</a></li>
             <li><a href="flores.php">Flores</a></li>
             <li><a href="cosechas.php">Cosechas</a></li>
             <li><a href="produccion.php">Producción</a></li>
@@ -34,6 +38,8 @@
             <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
+
+    </header>
 
     <?php
 session_start();
@@ -52,7 +58,7 @@ if ($role != 'usuario_admin' && $role != 'usuario_ventas') {
 }
 
 // Configuración de la conexión a la base de datos
-$host = '10.241.0.61';
+$host = '192.168.100.161';
 $db = 'flores';
 $user = ($role == 'usuario_admin') ? 'usuario_admin' : 'usuario_ventas';
 $password = ($role == 'usuario_admin') ? 'admin_1234' : 'ventas_1234';

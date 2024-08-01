@@ -9,11 +9,12 @@
 <body>
 <header class="header">
         <div class="logo">
-            <img src="logo.png" alt="Florería Elegante">
+            <img src="img/logo.png" alt="Florería Elegante">
         </div>
         <nav class="nav">
         <ul>
-            <li><a href="index.php">Inicio</a></li>
+        <li><a href="logout.php">Salir</a></li>
+            <li><a href="inicio1.html">Inicio</a></li>
             <li><a href="flores.php">Flores</a></li>
             <li><a href="cosechas.php">Cosechas</a></li>
             <li><a href="produccion.php">Producción</a></li>
@@ -43,7 +44,7 @@ if ($role != 'usuario_admin' && $role != 'usuario_produccion') {
 }
 
 // Configuración de la conexión a la base de datos
-$host = '10.241.0.61';
+$host = '192.168.100.161';
 $db = 'flores';
 $user = ($role == 'usuario_admin') ? 'usuario_admin' : 'usuario_produccion';
 $password = ($role == 'usuario_admin') ? 'admin_1234' : 'produccion_1234';

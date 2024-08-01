@@ -2,7 +2,7 @@
 session_start();
 
 // Configuración de la conexión a la base de datos
-$host = '10.241.0.61';
+$host = '192.168.100.161';
 $db = 'flores';
 $user = 'Postgres1';
 $password = '1234';
@@ -24,7 +24,7 @@ try {
         if ($user && password_verify($password, $user['password'])) {
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $user['role'];
-            header('Location: index.php');
+            header('Location: inicio1.html');
             exit;
         } else {
             echo "<p>Nombre de usuario o contraseña incorrectos.</p>";

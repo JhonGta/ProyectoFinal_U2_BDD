@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 
 // Verifica si el usuario está autenticado
@@ -16,7 +15,7 @@ if ($role != 'usuario_admin' && $role != 'usuario_ventas') {
 }
 
 // Configuración de la conexión a la base de datos
-$host = '10.241.0.61';
+$host = '192.168.100.161';
 $db = 'flores';
 $user = ($role == 'usuario_admin') ? 'usuario_admin' : 'usuario_ventas';
 $password = ($role == 'usuario_admin') ? 'admin_1234' : 'ventas_1234';
@@ -27,47 +26,55 @@ try {
 
     // Procesar el formulario
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $exportacion_id = $_POST['exportacion_id'];
-        $fecha = $_POST['fecha'];
-        $cliente_nombre = $_POST['cliente_nombre'];
-        $cliente_cedula_ruc = $_POST['cliente_cedula_ruc'];
-        $cliente_direccion = $_POST['cliente_direccion'];
-        $cliente_correo = $_POST['cliente_correo'];
-        $seguro = $_POST['seguro'];
-        $costo_exportacion = $_POST['costo_exportacion'];
-        $metodo_pago_id = $_POST['metodo_pago'];
-        $iva = $_POST['iva'];
-        $total = $_POST['total'];
-        $subtotal = $_POST['subtotal'];
+        $pdo->beginTransaction(); // Iniciar la transacción
 
-        // Insertar cliente
-        $sql_cliente = "INSERT INTO clientes (nombre, cedula_ruc, direccion, correo_electronico) VALUES (:nombre, :cedula_ruc, :direccion, :correo_electronico) RETURNING id";
-        $stmt_cliente = $pdo->prepare($sql_cliente);
-        $stmt_cliente->execute([
-            ':nombre' => $cliente_nombre,
-            ':cedula_ruc' => $cliente_cedula_ruc,
-            ':direccion' => $cliente_direccion,
-            ':correo_electronico' => $cliente_correo
-        ]);
-        $cliente_id = $stmt_cliente->fetchColumn();
+        try {
+            $exportacion_id = $_POST['exportacion_id'];
+            $fecha = $_POST['fecha'];
+            $cliente_nombre = $_POST['cliente_nombre'];
+            $cliente_cedula_ruc = $_POST['cliente_cedula_ruc'];
+            $cliente_direccion = $_POST['cliente_direccion'];
+            $cliente_correo = $_POST['cliente_correo'];
+            $seguro = $_POST['seguro'];
+            $costo_exportacion = $_POST['costo_exportacion'];
+            $metodo_pago_id = $_POST['metodo_pago'];
+            $iva = $_POST['iva'];
+            $total = $_POST['total'];
+            $subtotal = $_POST['subtotal'];
 
-        // Insertar en la tabla facturacion
-        $sql_facturacion = "INSERT INTO facturacion (exportacion_id, fecha, cliente_id, seguro, costo_exportacion, iva, total, monto, metodo_pago_id)
-                            VALUES (:exportacion_id, :fecha, :cliente_id, :seguro, :costo_exportacion, :iva, :total, :monto, :metodo_pago_id)";
-        $stmt_facturacion = $pdo->prepare($sql_facturacion);
-        $stmt_facturacion->execute([
-            ':exportacion_id' => $exportacion_id,
-            ':fecha' => $fecha,
-            ':cliente_id' => $cliente_id,
-            ':seguro' => $seguro,
-            ':costo_exportacion' => $costo_exportacion,
-            ':iva' => $iva,
-            ':total' => $total,
-            ':monto' => $subtotal,
-            ':metodo_pago_id' => $metodo_pago_id
-        ]);
+            // Insertar cliente
+            $sql_cliente = "INSERT INTO clientes (nombre, cedula_ruc, direccion, correo_electronico) VALUES (:nombre, :cedula_ruc, :direccion, :correo_electronico) RETURNING id";
+            $stmt_cliente = $pdo->prepare($sql_cliente);
+            $stmt_cliente->execute([
+                ':nombre' => $cliente_nombre,
+                ':cedula_ruc' => $cliente_cedula_ruc,
+                ':direccion' => $cliente_direccion,
+                ':correo_electronico' => $cliente_correo
+            ]);
+            $cliente_id = $stmt_cliente->fetchColumn();
 
-        echo "<p>Datos insertados con éxito en la tabla facturacion!</p>";
+            // Insertar en la tabla facturacion
+            $sql_facturacion = "INSERT INTO facturacion (exportacion_id, fecha, cliente_id, seguro, costo_exportacion, iva, total, monto, metodo_pago_id)
+                                VALUES (:exportacion_id, :fecha, :cliente_id, :seguro, :costo_exportacion, :iva, :total, :monto, :metodo_pago_id)";
+            $stmt_facturacion = $pdo->prepare($sql_facturacion);
+            $stmt_facturacion->execute([
+                ':exportacion_id' => $exportacion_id,
+                ':fecha' => $fecha,
+                ':cliente_id' => $cliente_id,
+                ':seguro' => $seguro,
+                ':costo_exportacion' => $costo_exportacion,
+                ':iva' => $iva,
+                ':total' => $total,
+                ':monto' => $subtotal,
+                ':metodo_pago_id' => $metodo_pago_id
+            ]);
+
+            $pdo->commit(); // Confirmar la transacción
+            echo "<p>Datos insertados con éxito en la tabla facturacion!</p>";
+        } catch (Exception $e) {
+            $pdo->rollback(); // Revertir la transacción
+            echo "<p>Error: " . $e->getMessage() . "</p>";
+        }
     }
 
     // Consulta SQL para obtener los datos de facturación
@@ -114,13 +121,18 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facturación</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/esti.css">
 </head>
 <body>
     <h2>Facturación</h2>
-    <nav>
+    <header class="header">
+        <div class="logo">
+            <img src="img/logo.png" alt="Florería Elegante">
+        </div>
+        <nav class="nav">
         <ul>
-            <li><a href="index.php">Inicio</a></li>
+        <li><a href="logout.php">Salir</a></li>
+            <li><a href="inicio1.html">Inicio</a></li>
             <li><a href="flores.php">Flores</a></li>
             <li><a href="cosechas.php">Cosechas</a></li>
             <li><a href="produccion.php">Producción</a></li>
@@ -130,6 +142,7 @@ try {
             <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
+    </header>
 
     <h2>Insertar Nueva Facturación</h2>
     <form method="post" action="">
@@ -170,9 +183,6 @@ try {
         <input type="number" id="seguro" name="seguro" value="100" readonly>
         <br>
         <label for="costo_exportacion">Costo de envio de Exportación:</label>
-.
-       <!-- <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" min="0.01" required>  -->
-
         <input type="number" step="0.01" id="costo_exportacion" name="costo_exportacion" min="0.01" required oninput="calcularTotales()">
         <br>
         <label for="metodo_pago">Método de Pago:</label>
@@ -227,7 +237,5 @@ try {
             document.getElementById('total').value = total.toFixed(2);
         }
     </script>
-
-
 </body>
 </html>

@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Producción</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/esti.css">
 </head>
 <body>
     <h2>Producción</h2>
-    <nav>
+    <header class="header">
+        <div class="logo">
+            <img src="img/logo.png" alt="Florería Elegante">
+        </div>
+        <nav class="nav">
         <ul>
-            <li><a href="index.php">Inicio</a></li>
+            <li><a href="inicio1.html">Inicio</a></li>
             <li><a href="flores.php">Flores</a></li>
             <li><a href="cosechas.php">Cosechas</a></li>
             <li><a href="produccion.php">Producción</a></li>
@@ -20,6 +24,8 @@
             <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
+
+    </header>
 
     <?php
 
@@ -39,7 +45,7 @@ if ($role != 'usuario_admin' && $role != 'usuario_produccion') {
 }
 
     
-    $host = '10.241.0.61';
+    $host = '192.168.100.161';
     $db = 'flores';
     $user = 'Postgres1';
     $password = '1234';
