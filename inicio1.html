@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Florería Elegante</title>
+    <title>Flores & Magia</title>
     <link rel="stylesheet" href="css/sty.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.1.4/lib/noty.css">
 </head>
+
 <body>
     <header class="header">
         <div class="logo">
@@ -15,6 +20,7 @@
         </div>
         <nav class="nav">
             <ul>
+                <li><a href="logout.php">Salir</a></li>
                 <li><a href="inicio1.html">Inicio</a></li>
                 <li><a href="flores.php">Flores</a></li>
                 <li><a href="cosechas.php">Cosechas</a></li>
@@ -91,7 +97,8 @@
         <div class="footer-container">
             <div class="footer-section">
                 <h3>Sobre Nosotros</h3>
-                <p>Somos una florería dedicada a ofrecer las mejores flores y servicios para tus ocasiones especiales.</p>
+                <p>Somos una florería dedicada a ofrecer las mejores flores y servicios para tus ocasiones especiales.
+                </p>
             </div>
             <div class="footer-section">
                 <h3>Enlaces Rápidos</h3>
@@ -129,5 +136,27 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script src="script.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/noty@3.1.4/lib/noty.js"></script>
+    
+    <script>
+    Swal.fire({
+      title: '¡Éxito!',
+      text: 'La operación se realizó correctamente.',
+      icon: 'success',
+      confirmButtonText: 'Aceptar'
+    });
+    toastr.success('La operación se realizó correctamente', 'Éxito');
+    new Noty({
+      text: 'La operación se realizó correctamente',
+      type: 'success',
+      layout: 'topRight',
+      timeout: 3000
+    }).show();
+    
+    </script>
 </body>
+
 </html>

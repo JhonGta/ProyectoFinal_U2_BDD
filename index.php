@@ -116,5 +116,26 @@ $role = $_SESSION['role'];
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/noty@3.1.4/lib/noty.js"></script>
+
+<script>
+Swal.fire({
+  title: '¡Éxito!',
+  text: 'La operación se realizó correctamente.',
+  icon: 'success',
+  confirmButtonText: 'Aceptar'
+});
+toastr.success('La operación se realizó correctamente', 'Éxito');
+new Noty({
+  text: 'La operación se realizó correctamente',
+  type: 'success',
+  layout: 'topRight',
+  timeout: 3000
+}).show();
+
+</script>
 </body>
 </html>

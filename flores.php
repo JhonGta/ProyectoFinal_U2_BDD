@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Flores</title>
     <link rel="stylesheet" href="css/esti.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.1.4/lib/noty.css">
+
 </head>
 <body>
 <header class="header">
@@ -13,7 +17,7 @@
         </div>
         <nav class="nav">
         <ul>
-        <li><a href="logout.php">Salir</a></li>
+            <li><a href="logout.php">Salir</a></li>
             <li><a href="inicio1.html">Inicio</a></li>
             <li><a href="flores.php">Flores</a></li>
             <li><a href="cosechas.php">Cosechas</a></li>
@@ -21,7 +25,6 @@
             <li><a href="exportaciones.php">Exportaciones</a></li>
             <li><a href="empleados.php">Empleados</a></li>
             <li><a href="facturacion.php">Facturación</a></li>
-            <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
 
@@ -164,11 +167,10 @@ if (isset($error)) {
         echo "<p>Error: " . $e->getMessage() . "</p>";
     }
     ?>
-<div id="editar">
+<div id="editar" class="form-container">
     <?php if (isset($flor)): ?> 
-    
     <form method="post" action="">
-    <h2>Editar Flor</h2>
+        <h2>Editar Flor</h2>
         <input type="hidden" name="update_id" value="<?php echo htmlspecialchars($flor['id']); ?>">
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre" value="<?php echo htmlspecialchars($flor['nombre']); ?>" required>
@@ -196,12 +198,11 @@ if (isset($error)) {
         <input type="submit" value="Actualizar">
     </form>
     <?php endif; ?>
-    </div>
+</div>
 
-
-    <div id="insertar">
+<div id="insertar" class="form-container">
     <form method="post" action="">
-    <h2>Insertar Nueva Flor</h2>
+        <h2>Insertar Nueva Flor</h2>
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre" required>
         <br>
@@ -227,6 +228,56 @@ if (isset($error)) {
         <br>
         <input type="submit" value="Insertar">
     </form>
-    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/noty@3.1.4/lib/noty.js"></script>
+
+<script>
+
+toastr.success('La operación se realizó correctamente', 'Éxito');
+new Noty({
+  text: 'La operación se realizó correctamente',
+  type: 'success',
+  layout: 'topRight',
+  timeout: 3000
+}).show();
+
+</script>
+<div id="alert-container"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Función para mostrar alertas Toastr
+    function showToastr(type, message) {
+        console.log(`Toastr ${type}: ${message}`); // Para depuración
+        toastr[type](message);
+    }
+
+    // Función para mostrar alertas Noty
+    function showNoty(type, message) {
+        console.log(`Noty ${type}: ${message}`); // Para depuración
+        new Noty({
+            text: message,
+            type: type,
+            layout: 'topRight',
+            timeout: 3000
+        }).show();
+    }
+
+    // Mostrar alertas Toastr o Noty basadas en las variables PHP
+    <?php if (isset($message)): ?>
+        showToastr('success', '<?php echo addslashes($message); ?>');
+        showNoty('success', '<?php echo addslashes($message); ?>');
+    <?php endif; ?>
+
+    <?php if (isset($error)): ?>
+        showToastr('error', '<?php echo addslashes($error); ?>');
+        showNoty('error', '<?php echo addslashes($error); ?>');
+    <?php endif; ?>
+});
+</script>
+
+
 </body>
 </html>
