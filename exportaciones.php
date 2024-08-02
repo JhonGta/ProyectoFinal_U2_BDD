@@ -166,19 +166,21 @@ $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
             echo "<br>";
 
             // Obtener datos de la tabla pais para llenar el campo destino
-            echo "<label for=\"destino_id\">Destino:</label>";
-            echo "<select id=\"destino_id\" name=\"destino_id\" required>";
-            try {
-                $stmt = $pdo->query("SELECT id, nombre FROM pais");
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    $selected = isset($exportacion) && $row['id'] == $exportacion['destino_id'] ? 'selected' : '';
-                    echo "<option value=\"" . htmlspecialchars($row['id']) . "\" $selected>" . htmlspecialchars($row['nombre']) . "</option>";
-                }
-            } catch (PDOException $e) {
-                echo "<option>Error: " . $e->getMessage() . "</option>";
-            }
-            echo "</select>";
-            echo "<br>";
+// Obtener datos de la tabla pais para llenar el campo destino
+echo "<label for=\"destino_id\">Destino:</label>";
+echo "<select id=\"destino_id\" name=\"destino_id\" required>";
+try {
+    $stmt = $pdo->query("SELECT p.id, pi.nombre FROM pais p JOIN pais_info pi ON p.id = pi.pais_id");
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $selected = isset($exportacion) && $row['id'] == $exportacion['destino_id'] ? 'selected' : '';
+        echo "<option value=\"" . htmlspecialchars($row['id']) . "\" $selected>" . htmlspecialchars($row['nombre']) . "</option>";
+    }
+} catch (PDOException $e) {
+    echo "<option>Error: " . $e->getMessage() . "</option>";
+}
+echo "</select>";
+echo "<br>";
+
 
             $precio_total_value = isset($exportacion) ? htmlspecialchars($exportacion['precio_total']) : '';
             echo "<label for=\"precio_total\">Precio Total:</label>";
@@ -189,35 +191,37 @@ $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
             echo "</form>";
 
             // Mostrar la tabla de exportaciones
-            $stmt = $pdo->query("SELECT ex.id, ex.fecha, pa.nombre AS pais_destino, pr.cantidad, fl.nombre AS flor, ex.precio_total
-                                 FROM exportaciones ex
-                                 JOIN produccion pr ON ex.produccion_id = pr.id
-                                 JOIN cosechas co ON pr.cosecha_id = co.id
-                                 JOIN flores fl ON co.flor_id = fl.id
-                                 JOIN pais pa ON ex.destino_id = pa.id");
+            $stmt = $pdo->query("SELECT ex.id, ex.fecha, pi.nombre AS pais_destino, pr.cantidad, fl.nombre AS flor, ex.precio_total
+            FROM exportaciones ex
+            JOIN produccion pr ON ex.produccion_id = pr.id
+            JOIN cosechas co ON pr.cosecha_id = co.id
+            JOIN flores fl ON co.flor_id = fl.id
+            JOIN pais p ON ex.destino_id = p.id
+            JOIN pais_info pi ON p.id = pi.pais_id");
 
-            echo "<h2>Exportaciones Registradas</h2>";
-            echo "<table>";
-            echo "<tr><th>ID</th><th>Fecha</th><th>Destino</th><th>Cantidad</th><th>Flor</th><th>Precio Total</th><th>Acciones</th></tr>";
+echo "<h2>Exportaciones Registradas</h2>";
+echo "<table>";
+echo "<tr><th>ID</th><th>Fecha</th><th>Destino</th><th>Cantidad</th><th>Flor</th><th>Precio Total</th><th>Acciones</th></tr>";
 
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                echo "<tr>";
-                echo "<td>" . htmlspecialchars($row['id']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['fecha']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['pais_destino']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['cantidad']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['flor']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['precio_total']) . "</td>";
-                echo "<td>";
-                echo "<form method=\"post\" action=\"\" style=\"display:inline-block;\">";
-                echo "<input type=\"hidden\" name=\"edit_id\" value=\"" . htmlspecialchars($row['id']) . "\">";
-                echo "<input type=\"submit\" value=\"Editar\">";
-                echo "</form>";
-                echo "</td>";
-                echo "</tr>";
-            }
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+echo "<tr>";
+echo "<td>" . htmlspecialchars($row['id']) . "</td>";
+echo "<td>" . htmlspecialchars($row['fecha']) . "</td>";
+echo "<td>" . htmlspecialchars($row['pais_destino']) . "</td>";
+echo "<td>" . htmlspecialchars($row['cantidad']) . "</td>";
+echo "<td>" . htmlspecialchars($row['flor']) . "</td>";
+echo "<td>" . htmlspecialchars($row['precio_total']) . "</td>";
+echo "<td>";
+echo "<form method=\"post\" action=\"\" style=\"display:inline-block;\">";
+echo "<input type=\"hidden\" name=\"edit_id\" value=\"" . htmlspecialchars($row['id']) . "\">";
+echo "<input type=\"submit\" value=\"Editar\">";
+echo "</form>";
+echo "</td>";
+echo "</tr>";
+}
 
-            echo "</table>";
+echo "</table>";
+
         }
     } catch (PDOException $e) {
         echo "<p>Error: " . $e->getMessage() . "</p>";
