@@ -26,7 +26,7 @@
     </header>
 
     <main>
-       
+
         <?php
         session_start();
 
@@ -203,7 +203,7 @@
         <?php endif; ?>
 
         <!-- Formulario de Inserción -->
-        
+       
         <div class="form-container">
         <h2>Agregar Nueva Cosecha</h2>
             <form method="post" action="">

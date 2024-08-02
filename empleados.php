@@ -26,7 +26,6 @@
     </header>
 
     <main>
-
         <?php
         session_start();
 
@@ -54,7 +53,7 @@
             $pdo = new PDO($dsn);
 
             if ($pdo) {
-
+                 
                 if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $nombre = $_POST['nombre'];
                     $cargo = $_POST['cargo'];

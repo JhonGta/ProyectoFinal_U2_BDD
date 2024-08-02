@@ -167,11 +167,9 @@ if (isset($error)) {
     }
     ?>
 <div id="editar" class="form-container">
-<?php if (isset($flor)): ?> 
-<h2>Editar Flor</h2>
-    
+    <?php if (isset($flor)): ?> 
     <form method="post" action="">
-
+        <h2>Editar Flor</h2>
         <input type="hidden" name="update_id" value="<?php echo htmlspecialchars($flor['id']); ?>">
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre" value="<?php echo htmlspecialchars($flor['nombre']); ?>" required>
@@ -189,13 +187,13 @@ if (isset($error)) {
             }
             ?>
         </select>
-        
+        <br>
         <label for="color">Color:</label>
         <input type="text" id="color" name="color" value="<?php echo htmlspecialchars($flor['color']); ?>" required>
-        
+        <br>
         <label for="precio_unitario">Precio Unitario:</label>
         <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" value="<?php echo htmlspecialchars($flor['precio_unitario']); ?>" min="0" required>
-        
+        <br>
         <input type="submit" value="Actualizar">
     </form>
     <?php endif; ?>

@@ -53,7 +53,7 @@
             $pdo = new PDO($dsn);
 
             if ($pdo) {
-    
+              
                 // Manejo de inserción
                 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cosecha_id']) && !isset($_POST['update_id'])) {
                     $cosecha_id = $_POST['cosecha_id'];
@@ -186,6 +186,7 @@
                 <input type="submit" value="Insertar" class="btn btn-primary">
             </form>
         </div>
+
         <!-- Formulario para editar producción -->
         <?php if (isset($produccion)): ?>
             <div class="form-container">
