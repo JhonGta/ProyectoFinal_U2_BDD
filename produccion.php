@@ -29,13 +29,11 @@
         <?php
         session_start();
 
-        // Verifica si el usuario está autenticado
         if (!isset($_SESSION['username'])) {
             header('Location: login.php');
             exit;
         }
 
-        // Verifica el rol del usuario
         $role = $_SESSION['role'];
         if ($role != 'usuario_admin' && $role != 'usuario_produccion') {
             echo "<p>Acceso denegado.</p>";
@@ -53,63 +51,55 @@
             $pdo = new PDO($dsn);
 
             if ($pdo) {
-              
-                // Manejo de inserción
+
                 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cosecha_id']) && !isset($_POST['update_id'])) {
                     $cosecha_id = $_POST['cosecha_id'];
                     $fecha = $_POST['fecha'];
                     $cantidad = $_POST['cantidad'];
 
-                    // Obtener la cantidad disponible de la cosecha
                     $stmt = $pdo->prepare("SELECT cantidad FROM cosechas WHERE id = :cosecha_id");
                     $stmt->execute([':cosecha_id' => $cosecha_id]);
                     $cosecha = $stmt->fetch(PDO::FETCH_ASSOC);
 
                     if (!$cosecha) {
-                        echo "<div class='alert alert-error'>Error: No se encontró la cosecha.</div>";
+                        echo "<p class='alert alert-error'>Error: No se encontró la cosecha.</p>";
                     } else {
                         $cantidad_disponible = $cosecha['cantidad'];
 
-                        // Validar si la cantidad solicitada es mayor a la cantidad disponible
                         if ($cantidad > $cantidad_disponible) {
-                            echo "<div class='alert alert-error'>Error: La cantidad solicitada supera la cantidad disponible en la cosecha ($cantidad_disponible).</div>";
+                            echo "<p class='alert alert-error'>Error: La cantidad solicitada supera la cantidad disponible en la cosecha ($cantidad_disponible).</p>";
                         } else {
-                            // Insertar la producción
                             $sql = "INSERT INTO produccion (cosecha_id, fecha, cantidad, estado) VALUES (:cosecha_id, :fecha, :cantidad, 'Para exportación')";
                             $stmt = $pdo->prepare($sql);
                             $stmt->execute([':cosecha_id' => $cosecha_id, ':fecha' => $fecha, ':cantidad' => $cantidad]);
 
-                            // Actualizar la cantidad disponible en la cosecha
                             $nuevo_stock = $cantidad_disponible - $cantidad;
                             $updateStmt = $pdo->prepare("UPDATE cosechas SET cantidad = :nuevo_stock WHERE id = :cosecha_id");
                             $updateStmt->execute([':nuevo_stock' => $nuevo_stock, ':cosecha_id' => $cosecha_id]);
 
-                            echo "<div class='alert alert-success'>Datos insertados con éxito!</div>";
+                            echo "<p class='alert alert-success'>Datos insertados con éxito!</p>";
                         }
                     }
                 }
 
-                // Manejo de eliminación
                 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id'])) {
                     $delete_id = $_POST['delete_id'];
 
                     try {
-                        // Eliminar la fila de producción
                         $sql = "DELETE FROM produccion WHERE id = :id";
                         $stmt = $pdo->prepare($sql);
                         $stmt->execute([':id' => $delete_id]);
 
-                        echo "<div class='alert alert-success'>Producción eliminada con éxito!</div>";
+                        echo "<p class='alert alert-success'>Producción eliminada con éxito!</p>";
                     } catch (PDOException $e) {
                         if ($e->getCode() == '23503') {
-                            echo "<div class='alert alert-error'>Error: Esta producción no se puede eliminar debido a que está siendo utilizada en un proceso de exportación.</div>";
+                            echo "<p class='alert alert-error'>Error: Esta producción no se puede eliminar debido a que está siendo utilizada en un proceso de exportación.</p>";
                         } else {
-                            echo "<div class='alert alert-error'>Error: " . $e->getMessage() . "</div>";
+                            echo "<p class='alert alert-error'>Error: " . $e->getMessage() . "</p>";
                         }
                     }
                 }
 
-                // Manejo de edición
                 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit_id'])) {
                     $edit_id = $_POST['edit_id'];
                     $sql = "SELECT * FROM produccion WHERE id = :id";
@@ -129,12 +119,11 @@
                     $stmt = $pdo->prepare($sql);
                     $stmt->execute([':cosecha_id' => $cosecha_id, ':fecha' => $fecha, ':cantidad' => $cantidad, ':estado' => $estado, ':id' => $update_id]);
 
-                    echo "<div class='alert alert-success'>Producción actualizada con éxito!</div>";
+                    echo "<p class='alert alert-success'>Producción actualizada con éxito!</p>";
                     header("Location: produccion.php");
                     exit();
                 }
 
-                // Mostrar la tabla de producción
                 $stmt = $pdo->query("SELECT produccion.id, cosechas.fecha AS cosecha_fecha, produccion.fecha AS produccion_fecha, produccion.cantidad, flores.nombre AS flor, produccion.estado
                                      FROM produccion
                                      JOIN cosechas ON produccion.cosecha_id = cosechas.id
@@ -169,50 +158,80 @@
                 echo "</table>";
             }
         } catch (PDOException $e) {
-            echo "<div class='alert alert-error'>Error: " . $e->getMessage() . "</div>";
+            echo "<p>Error: " . $e->getMessage() . "</p>";
         }
         ?>
 
-        <!-- Formulario para insertar nueva producción -->
+        <?php if (isset($produccion)): ?>
         <div class="form-container">
-            <h2>Insertar Nueva Producción</h2>
-            <form method="post" action="produccion.php">
-                <label for="cosecha_id">ID de Cosecha:</label>
-                <input type="number" id="cosecha_id" name="cosecha_id" required>
-                <label for="fecha">Fecha:</label>
-                <input type="date" id="fecha" name="fecha" required>
-                <label for="cantidad">Cantidad:</label>
-                <input type="number" id="cantidad" name="cantidad" required>
-                <input type="submit" value="Insertar" class="btn btn-primary">
+            <h2>Editar Producción</h2>
+            <form method="post" action="">
+                <input type="hidden" name="update_id" value="<?php echo htmlspecialchars($produccion['id']); ?>">
+                <div class="form-group">
+                    <label for="cosecha_id">Cosecha:</label>
+                    <select id="cosecha_id" name="cosecha_id" required class="form-control">
+                        <?php
+                        try {
+                            $stmt = $pdo->query("SELECT cosechas.id, flores.nombre AS flor, cosechas.fecha FROM cosechas JOIN flores ON cosechas.flor_id = flores.id");
+                            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                $selected = $row['id'] == $produccion['cosecha_id'] ? 'selected' : '';
+                                echo "<option value='" . htmlspecialchars($row['id']) . "' $selected>" . htmlspecialchars($row['flor']) . " (Fecha: " . htmlspecialchars($row['fecha']) . ")</option>";
+                            }
+                        } catch (PDOException $e) {
+                            echo "<p>Error: " . $e->getMessage() . "</p>";
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fecha">Fecha:</label>
+                    <input type="date" id="fecha" name="fecha" value="<?php echo htmlspecialchars($produccion['fecha']); ?>" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="cantidad">Cantidad:</label>
+                    <input type="number" id="cantidad" name="cantidad" value="<?php echo htmlspecialchars($produccion['cantidad']); ?>" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado:</label>
+                    <select id="estado" name="estado" required class="form-control">
+                        <option value="Para exportación" <?php echo $produccion['estado'] == 'Para exportación' ? 'selected' : ''; ?>>Para exportación</option>
+                        <option value="Vendido" <?php echo $produccion['estado'] == 'Vendido' ? 'selected' : ''; ?>>Vendido</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Actualizar</button>
             </form>
         </div>
-
-        <!-- Formulario para editar producción -->
-        <?php if (isset($produccion)): ?>
-            <div class="form-container">
-                <h2>Editar Producción</h2>
-                <form method="post" action="produccion.php">
-                    <input type="hidden" name="update_id" value="<?php echo htmlspecialchars($produccion['id']); ?>">
-                    <label for="cosecha_id">ID de Cosecha:</label>
-                    <input type="number" id="cosecha_id" name="cosecha_id" value="<?php echo htmlspecialchars($produccion['cosecha_id']); ?>" required>
-                    <label for="fecha">Fecha:</label>
-                    <input type="date" id="fecha" name="fecha" value="<?php echo htmlspecialchars($produccion['fecha']); ?>" required>
-                    <label for="cantidad">Cantidad:</label>
-                    <input type="number" id="cantidad" name="cantidad" value="<?php echo htmlspecialchars($produccion['cantidad']); ?>" required>
-                    <label for="estado">Estado:</label>
-                    <select id="estado" name="estado" required>
-                        <option value="Para exportación" <?php echo ($produccion['estado'] == 'Para exportación') ? 'selected' : ''; ?>>Para exportación</option>
-                        <option value="En almacén" <?php echo ($produccion['estado'] == 'En almacén') ? 'selected' : ''; ?>>En almacén</option>
-                        <option value="En tránsito" <?php echo ($produccion['estado'] == 'En tránsito') ? 'selected' : ''; ?>>En tránsito</option>
+        <?php else: ?>
+        <div class="form-container">
+            <h2>Insertar Nueva Producción</h2>
+            <form method="post" action="">
+                <div class="form-group">
+                    <label for="cosecha_id">Cosecha:</label>
+                    <select id="cosecha_id" name="cosecha_id" required class="form-control">
+                        <?php
+                        try {
+                            $stmt = $pdo->query("SELECT cosechas.id, flores.nombre AS flor, cosechas.fecha FROM cosechas JOIN flores ON cosechas.flor_id = flores.id");
+                            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                echo "<option value='" . htmlspecialchars($row['id']) . "'>" . htmlspecialchars($row['flor']) . " (Fecha: " . htmlspecialchars($row['fecha']) . ")</option>";
+                            }
+                        } catch (PDOException $e) {
+                            echo "<p>Error: " . $e->getMessage() . "</p>";
+                        }
+                        ?>
                     </select>
-                    <input type="submit" value="Actualizar" class="btn btn-primary">
-                </form>
-            </div>
+                </div>
+                <div class="form-group">
+                    <label for="fecha">Fecha:</label>
+                    <input type="date" id="fecha" name="fecha" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="cantidad">Cantidad:</label>
+                    <input type="number" id="cantidad" name="cantidad" required class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Insertar</button>
+            </form>
+        </div>
         <?php endif; ?>
     </main>
-
-    <footer class="footer">
-        <p>&copy; 2023 Florería Elegante. Todos los derechos reservados.</p>
-    </footer>
 </body>
 </html>

@@ -70,53 +70,28 @@ try {
             ]);
 
             $pdo->commit(); // Confirmar la transacción
-            echo "<p>Datos insertados con éxito en la tabla facturacion!</p>";
+            echo "<div class='alert alert-success'>Datos insertados con éxito!</div>";
         } catch (Exception $e) {
             $pdo->rollback(); // Revertir la transacción
-            echo "<p>Error: " . $e->getMessage() . "</p>";
+            echo "<div class='alert alert-error'>Error: " . $e->getMessage() . "</div>";
         }
     }
 
-    // Consulta SQL para obtener los datos de facturación
-    $stmt = $pdo->query("SELECT facturacion.id, facturacion.fecha, exportaciones.id AS exportacion_id, produccion.cantidad, flores.precio_unitario,
-                        (produccion.cantidad * flores.precio_unitario) AS subtotal,
-                        facturacion.seguro, facturacion.costo_exportacion, facturacion.iva, facturacion.total, metodo_pago.nombre AS metodo_pago
-                        FROM facturacion
-                        JOIN exportaciones ON facturacion.exportacion_id = exportaciones.id
-                        JOIN produccion ON exportaciones.produccion_id = produccion.id
-                        JOIN cosechas ON produccion.cosecha_id = cosechas.id
-                        JOIN flores ON cosechas.flor_id = flores.id
-                        JOIN metodo_pago ON facturacion.metodo_pago_id = metodo_pago.id");
-
-    // Mostrar resultados en tabla
-    echo "<h2>Facturaciones Realizadas</h2>";
-    echo "<table>";
-    echo "<thead><tr><th>ID</th><th>Fecha</th><th>Exportación</th><th>Cantidad</th><th>Precio Unitario</th><th>Subtotal</th><th>Seguro</th><th>Costo Exportación</th><th>IVA</th><th>Total</th><th>Método de Pago</th></tr></thead>";
-    echo "<tbody>";
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "<tr>";
-        echo "<td>" . htmlspecialchars($row['id']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['fecha']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['exportacion_id']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['cantidad']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['precio_unitario']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['subtotal']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['seguro']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['costo_exportacion']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['iva']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['total']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['metodo_pago']) . "</td>";
-        echo "</tr>";
-    }
-    echo "</tbody>";
-    echo "</table>";
-
+    // Consultar datos de la tabla facturacion
+    $facturacion = [];
+    $sql = "SELECT f.id, f.exportacion_id, f.fecha, c.nombre AS cliente_nombre, f.seguro, f.costo_exportacion, f.iva, f.total, f.monto, mp.nombre AS metodo_pago
+            FROM facturacion f
+            JOIN clientes c ON f.cliente_id = c.id
+            JOIN metodo_pago mp ON f.metodo_pago_id = mp.id";
+    $stmt = $pdo->query($sql);
+    $facturacion = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    echo "<p>Error: " . $e->getMessage() . "</p>";
+    echo "Error en la conexión: " . $e->getMessage();
 }
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -124,114 +99,156 @@ try {
     <link rel="stylesheet" href="css/esti.css">
 </head>
 <body>
-    <h2>Facturación</h2>
     <header class="header">
         <div class="logo">
             <img src="img/logo.png" alt="Florería Elegante">
         </div>
         <nav class="nav">
-        <ul>
-        <li><a href="logout.php">Salir</a></li>
-            <li><a href="inicio1.html">Inicio</a></li>
-            <li><a href="flores.php">Flores</a></li>
-            <li><a href="cosechas.php">Cosechas</a></li>
-            <li><a href="produccion.php">Producción</a></li>
-            <li><a href="exportaciones.php">Exportaciones</a></li>
-            <li><a href="empleados.php">Empleados</a></li>
-            <li><a href="facturacion.php">Facturación</a></li>
-            <li><a href="logout.php">Salir</a></li>
-        </ul>
-    </nav>
+            <ul>
+                <li><a href="logout.php">Salir</a></li>
+                <li><a href="inicio1.html">Inicio</a></li>
+                <li><a href="flores.php">Flores</a></li>
+                <li><a href="cosechas.php">Cosechas</a></li>
+                <li><a href="produccion.php">Producción</a></li>
+                <li><a href="exportaciones.php">Exportaciones</a></li>
+                <li><a href="empleados.php">Empleados</a></li>
+                <li><a href="facturacion.php">Facturación</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <h2>Insertar Nueva Facturación</h2>
-    <form method="post" action="">
-        <label for="exportacion_id">Exportación:</label>
-        <select id="exportacion_id" name="exportacion_id" required>
-            <?php
-            try {
-                $stmt = $pdo->query("SELECT exportaciones.id, produccion.cantidad, flores.precio_unitario, flores.nombre AS flor
-                                    FROM exportaciones
-                                    JOIN produccion ON exportaciones.produccion_id = produccion.id
-                                    JOIN cosechas ON produccion.cosecha_id = cosechas.id
-                                    JOIN flores ON cosechas.flor_id = flores.id");
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    echo "<option value=\"" . htmlspecialchars($row['id']) . "\" data-cantidad=\"" . htmlspecialchars($row['cantidad']) . "\" data-precio-unitario=\"" . htmlspecialchars($row['precio_unitario']) . "\">" . htmlspecialchars($row['flor']) . " - Cantidad: " . htmlspecialchars($row['cantidad']) . "</option>";
-                }
-            } catch (PDOException $e) {
-                echo "<option>Error: " . $e->getMessage() . "</option>";
-            }
-            ?>
-        </select>
-        <br>
-        <label for="fecha">Fecha:</label>
-        <input type="date" id="fecha" name="fecha" required>
-        <br>
-        <label for="cliente_nombre">Cliente Nombre:</label>
-        <input type="text" id="cliente_nombre" name="cliente_nombre" required>
-        <br>
-        <label for="cliente_cedula_ruc">Cliente Cédula/RUC:</label>
-        <input type="text" id="cliente_cedula_ruc" name="cliente_cedula_ruc" required>
-        <br>
-        <label for="cliente_direccion">Cliente Dirección:</label>
-        <input type="text" id="cliente_direccion" name="cliente_direccion">
-        <br>
-        <label for="cliente_correo">Cliente Correo Electrónico:</label>
-        <input type="email" id="cliente_correo" name="cliente_correo">
-        <br>
-        <label for="seguro">Seguro:</label>
-        <input type="number" id="seguro" name="seguro" value="100" readonly>
-        <br>
-        <label for="costo_exportacion">Costo de envio de Exportación:</label>
-        <input type="number" step="0.01" id="costo_exportacion" name="costo_exportacion" min="0.01" required oninput="calcularTotales()">
-        <br>
-        <label for="metodo_pago">Método de Pago:</label>
-        <select id="metodo_pago" name="metodo_pago" required>
-            <?php
-            try {
-                $stmt = $pdo->query("SELECT id, nombre FROM metodo_pago");
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    echo "<option value=\"" . htmlspecialchars($row['id']) . "\">" . htmlspecialchars($row['nombre']) . "</option>";
-                }
-            } catch (PDOException $e) {
-                echo "<option>Error: " . $e->getMessage() . "</option>";
-            }
-            ?>
-        </select>
-        <br>
-        <label for="iva">IVA (15%):</label>
-        <input type="number" id="iva" name="iva" readonly>
-        <br>
-        <label for="subtotal">Subtotal:</label>
-        <input type="number" id="subtotal" name="subtotal" readonly>
-        <br>
-        <label for="total">Total:</label>
-        <input type="number" id="total" name="total" readonly>
-        <br>
-        <input type="submit" value="Insertar">
-    </form>
+    <div class="form-container">
+        <h2>Insertar Nueva Facturación</h2>
+        <form method="post" action="">
+            <div class="form-group">
+                <label for="exportacion_id">Exportación:</label>
+                <select id="exportacion_id" name="exportacion_id" required class="form-control">
+                    <?php
+                    try {
+                        $stmt = $pdo->query("SELECT exportaciones.id, produccion.cantidad, flores.precio_unitario, flores.nombre AS flor
+                                            FROM exportaciones
+                                            JOIN produccion ON exportaciones.produccion_id = produccion.id
+                                            JOIN cosechas ON produccion.cosecha_id = cosechas.id
+                                            JOIN flores ON cosechas.flor_id = flores.id");
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            echo "<option value=\"" . htmlspecialchars($row['id']) . "\" data-cantidad=\"" . htmlspecialchars($row['cantidad']) . "\" data-precio-unitario=\"" . htmlspecialchars($row['precio_unitario']) . "\">" . htmlspecialchars($row['flor']) . " - Cantidad: " . htmlspecialchars($row['cantidad']) . "</option>";
+                        }
+                    } catch (PDOException $e) {
+                        echo "<option>Error: " . $e->getMessage() . "</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" name="fecha" required class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="cliente_nombre">Cliente Nombre:</label>
+                <input type="text" id="cliente_nombre" name="cliente_nombre" required class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="cliente_cedula_ruc">Cliente Cédula/RUC:</label>
+                <input type="text" id="cliente_cedula_ruc" name="cliente_cedula_ruc" required class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="cliente_direccion">Cliente Dirección:</label>
+                <input type="text" id="cliente_direccion" name="cliente_direccion" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="cliente_correo">Cliente Correo Electrónico:</label>
+                <input type="email" id="cliente_correo" name="cliente_correo" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="seguro">Seguro:</label>
+                <input type="number" id="seguro" name="seguro" value="100" readonly class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="costo_exportacion">Costo de Envío de Exportación:</label>
+                <input type="number" step="0.01" id="costo_exportacion" name="costo_exportacion" min="0.01" required oninput="calcularTotales()" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="metodo_pago">Método de Pago:</label>
+                <select id="metodo_pago" name="metodo_pago" required class="form-control">
+                    <?php
+                    try {
+                        $stmt = $pdo->query("SELECT id, nombre FROM metodo_pago");
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            echo "<option value=\"" . htmlspecialchars($row['id']) . "\">" . htmlspecialchars($row['nombre']) . "</option>";
+                        }
+                    } catch (PDOException $e) {
+                        echo "<option>Error: " . $e->getMessage() . "</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="iva">IVA:</label>
+                <input type="number" step="0.01" id="iva" name="iva" readonly class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="total">Total:</label>
+                <input type="number" step="0.01" id="total" name="total" readonly class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="subtotal">Subtotal:</label>
+                <input type="number" step="0.01" id="subtotal" name="subtotal" readonly class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Insertar</button>
+        </form>
+    </div>
 
-    <!-- Script JavaScript para calcular totales -->
+    <div class="table-container">
+        <h2>Datos de Facturación</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Exportación</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Seguro</th>
+                    <th>Costo Exportación</th>
+                    <th>IVA</th>
+                    <th>Total</th>
+                    <th>Monto</th>
+                    <th>Método de Pago</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($facturacion as $row) : ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($row['id']); ?></td>
+                        <td><?php echo htmlspecialchars($row['exportacion_id']); ?></td>
+                        <td><?php echo htmlspecialchars($row['fecha']); ?></td>
+                        <td><?php echo htmlspecialchars($row['cliente_nombre']); ?></td>
+                        <td><?php echo htmlspecialchars($row['seguro']); ?></td>
+                        <td><?php echo htmlspecialchars($row['costo_exportacion']); ?></td>
+                        <td><?php echo htmlspecialchars($row['iva']); ?></td>
+                        <td><?php echo htmlspecialchars($row['total']); ?></td>
+                        <td><?php echo htmlspecialchars($row['monto']); ?></td>
+                        <td><?php echo htmlspecialchars($row['metodo_pago']); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
     <script>
-        document.getElementById('exportacion_id').addEventListener('change', function() {
-            calcularTotales();
-        });
-
         function calcularTotales() {
-            // Obtener los datos seleccionados
-            let exportacionSelect = document.getElementById('exportacion_id');
-            let selectedOption = exportacionSelect.options[exportacionSelect.selectedIndex];
-            let cantidad = parseFloat(selectedOption.getAttribute('data-cantidad'));
-            let precioUnitario = parseFloat(selectedOption.getAttribute('data-precio-unitario'));
-            let seguro = 100;
-            let costoExportacion = parseFloat(document.getElementById('costo_exportacion').value) || 0;
+            const exportacionSelect = document.getElementById('exportacion_id');
+            const costoExportacion = parseFloat(document.getElementById('costo_exportacion').value) || 0;
+            const seguro = parseFloat(document.getElementById('seguro').value) || 0;
 
-            // Calcular subtotal, iva y total
-            let subtotal = cantidad * precioUnitario;
-            let iva = subtotal * 0.15;
-            let total = subtotal + seguro + costoExportacion + iva;
+            const selectedOption = exportacionSelect.options[exportacionSelect.selectedIndex];
+            const cantidad = parseFloat(selectedOption.getAttribute('data-cantidad')) || 0;
+            const precioUnitario = parseFloat(selectedOption.getAttribute('data-precio-unitario')) || 0;
 
-            // Mostrar los valores calculados en los campos correspondientes
+            const monto = cantidad * precioUnitario;
+            const subtotal = monto + seguro + costoExportacion;
+            const iva = subtotal * 0.15;
+            const total = subtotal + iva;
+
             document.getElementById('subtotal').value = subtotal.toFixed(2);
             document.getElementById('iva').value = iva.toFixed(2);
             document.getElementById('total').value = total.toFixed(2);

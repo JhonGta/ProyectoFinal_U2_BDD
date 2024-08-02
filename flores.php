@@ -8,14 +8,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.1.4/lib/noty.css">
-
 </head>
 <body>
 <header class="header">
-        <div class="logo">
-            <img src="img/logo.png" alt="Florería Elegante">
-        </div>
-        <nav class="nav">
+    <div class="logo">
+        <img src="img/logo.png" alt="Florería Elegante">
+    </div>
+    <nav class="nav">
         <ul>
             <li><a href="logout.php">Salir</a></li>
             <li><a href="inicio1.html">Inicio</a></li>
@@ -27,9 +26,9 @@
             <li><a href="facturacion.php">Facturación</a></li>
         </ul>
     </nav>
-    </header>
+</header>
 
-    <?php
+<?php
 session_start();
 
 // Verifica si el usuario está autenticado
@@ -51,121 +50,116 @@ $db = 'flores';
 $user = ($role == 'usuario_admin') ? 'usuario_admin' : 'usuario_produccion';
 $password = ($role == 'usuario_admin') ? 'admin_1234' : 'produccion_1234';
 $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
-    try {
-        $pdo = new PDO($dsn);
 
-        if ($pdo) {
-            
-if (isset($message)) {
-    echo "<div class='alert alert-success'>$message</div>";
-}
-if (isset($error)) {
-    echo "<div class='alert alert-error'>$error</div>";
-}
+try {
+    $pdo = new PDO($dsn);
 
-
-            // Manejo de inserción
-            if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['nombre']) && !isset($_POST['update_id'])) {
-                $nombre = $_POST['nombre'];
-                $tipo_id = $_POST['tipo_id'];
-                $color = $_POST['color'];
-                $precio_unitario = $_POST['precio_unitario'];
-
-                // Validación del lado del servidor
-                if ($precio_unitario < 0) {
-                    echo "<p>Error: El precio unitario no puede ser negativo.</p>";
-                } else {
-                    $sql = "INSERT INTO flores (nombre, tipo_id, color, precio_unitario) VALUES (:nombre, :tipo_id, :color, :precio_unitario)";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute([':nombre' => $nombre, ':tipo_id' => $tipo_id, ':color' => $color, ':precio_unitario' => $precio_unitario]);
-
-                    echo "<p>Datos insertados con éxito!</p>";
-                }
-            }
-
-            // Manejo de eliminación
-            if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id'])) {
-                $delete_id = $_POST['delete_id'];
-
-                try {
-
-
-                    // Luego eliminar la fila de flores
-                    $sql = "DELETE FROM flores WHERE id = :id";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute([':id' => $delete_id]);
-
-                    echo "<p>Flor eliminada con éxito!</p>";
-                } catch (PDOException $e) {
-                    if ($e->getCode() == '23503') {
-                        echo "<p>Error: Esta flor no se puede eliminar debido a que está siendo utilizada en un proceso de Cosecha.</p>";
-                    } else {
-                        echo "<p>Error: " . $e->getMessage() . "</p>";
-                    }
-                }
-            }
-
-            // Manejo de edición
-            if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit_id'])) {
-                $edit_id = $_POST['edit_id'];
-                $sql = "SELECT * FROM flores WHERE id = :id";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([':id' => $edit_id]);
-                $flor = $stmt->fetch(PDO::FETCH_ASSOC);
-            }
-
-            if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
-                $update_id = $_POST['update_id'];
-                $nombre = $_POST['nombre'];
-                $tipo_id = $_POST['tipo_id'];
-                $color = $_POST['color'];
-                $precio_unitario = $_POST['precio_unitario'];
-
-                $sql = "UPDATE flores SET nombre = :nombre, tipo_id = :tipo_id, color = :color, precio_unitario = :precio_unitario WHERE id = :id";
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([':nombre' => $nombre, ':tipo_id' => $tipo_id, ':color' => $color, ':precio_unitario' => $precio_unitario, ':id' => $update_id]);
-
-                echo "<p>Flor actualizada con éxito!</p>";
-                header("Location: flores.php");
-                exit();
-            }
-
-            // Mostrar la tabla de flores
-            $stmt = $pdo->query("SELECT flores.id, flores.nombre, tipos_flores.nombre AS tipo, flores.color, flores.precio_unitario FROM flores JOIN tipos_flores ON flores.tipo_id = tipos_flores.id");
-
-            echo "<table>";
-            echo "<tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Color</th><th>Precio Unitario</th><th>Acciones</th></tr>";
-
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                echo "<tr>";
-                echo "<td>" . htmlspecialchars($row['id']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['nombre']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['tipo']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['color']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['precio_unitario']) . "</td>";
-                echo "<td>
-
-                <div class='action-buttons'>
-                        <form method='post' action='flores.php' style='display:inline-block;'>
-                            <input type='hidden' name='edit_id' value='" . htmlspecialchars($row['id']) . "'>
-                            <input type='submit' value='Editar'>
-                        
-                            <input type='hidden' name='delete_id' value='" . htmlspecialchars($row['id']) . "'>
-                            <input type='submit' value='Eliminar'>
-                        </form>
-
-                     </div>
-                
-                      </td>";
-                echo "</tr>";
-            }
-
-            echo "</table>";
+    if ($pdo) {
+        if (isset($message)) {
+            echo "<div class='alert alert-success'>$message</div>";
         }
-    } catch (PDOException $e) {
-        echo "<p>Error: " . $e->getMessage() . "</p>";
+        if (isset($error)) {
+            echo "<div class='alert alert-error'>$error</div>";
+        }
+
+        // Manejo de inserción
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['nombre']) && !isset($_POST['update_id'])) {
+            $nombre = $_POST['nombre'];
+            $tipo_id = $_POST['tipo_id'];
+            $color = $_POST['color'];
+            $precio_unitario = $_POST['precio_unitario'];
+
+            // Validación del lado del servidor
+            if ($precio_unitario < 0) {
+                echo "<p>Error: El precio unitario no puede ser negativo.</p>";
+            } else {
+                $sql = "INSERT INTO flores (nombre, tipo_id, color, precio_unitario) VALUES (:nombre, :tipo_id, :color, :precio_unitario)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([':nombre' => $nombre, ':tipo_id' => $tipo_id, ':color' => $color, ':precio_unitario' => $precio_unitario]);
+
+                echo "<p>Datos insertados con éxito!</p>";
+            }
+        }
+
+        // Manejo de eliminación
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_id'])) {
+            $delete_id = $_POST['delete_id'];
+
+            try {
+                $sql = "DELETE FROM flores WHERE id = :id";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([':id' => $delete_id]);
+
+                echo "<p>Flor eliminada con éxito!</p>";
+            } catch (PDOException $e) {
+                if ($e->getCode() == '23503') {
+                    echo "<p>Error: Esta flor no se puede eliminar debido a que está siendo utilizada en un proceso de Cosecha.</p>";
+                } else {
+                    echo "<p>Error: " . $e->getMessage() . "</p>";
+                }
+            }
+        }
+
+        // Manejo de edición
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit_id'])) {
+            $edit_id = $_POST['edit_id'];
+            $sql = "SELECT * FROM flores WHERE id = :id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([':id' => $edit_id]);
+            $flor = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_id'])) {
+            $update_id = $_POST['update_id'];
+            $nombre = $_POST['nombre'];
+            $tipo_id = $_POST['tipo_id'];
+            $color = $_POST['color'];
+            $precio_unitario = $_POST['precio_unitario'];
+
+            $sql = "UPDATE flores SET nombre = :nombre, tipo_id = :tipo_id, color = :color, precio_unitario = :precio_unitario WHERE id = :id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([':nombre' => $nombre, ':tipo_id' => $tipo_id, ':color' => $color, ':precio_unitario' => $precio_unitario, ':id' => $update_id]);
+
+            echo "<p>Flor actualizada con éxito!</p>";
+            header("Location: flores.php");
+            exit();
+        }
+
+        // Mostrar la tabla de flores
+        $stmt = $pdo->query("SELECT flores.id, flores.nombre, tipos_flores.nombre AS tipo, flores.color, flores.precio_unitario FROM flores JOIN tipos_flores ON flores.tipo_id = tipos_flores.id");
+
+        echo "<table>";
+        echo "<tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Color</th><th>Precio Unitario</th><th>Acciones</th></tr>";
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            echo "<tr>";
+            echo "<td>" . htmlspecialchars($row['id']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['nombre']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['tipo']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['color']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['precio_unitario']) . "</td>";
+            echo "<td>
+                <div class='action-buttons'>
+                    <form method='post' action='flores.php' style='display:inline-block;'>
+                        <input type='hidden' name='edit_id' value='" . htmlspecialchars($row['id']) . "'>
+                        <input type='submit' value='Editar'>
+                    </form>
+                    <form method='post' action='flores.php' style='display:inline-block;'>
+                        <input type='hidden' name='delete_id' value='" . htmlspecialchars($row['id']) . "'>
+                        <input type='submit' value='Eliminar'>
+                    </form>
+                </div>
+            </td>";
+            echo "</tr>";
+        }
+
+        echo "</table>";
     }
-    ?>
+} catch (PDOException $e) {
+    echo "<p>Error: " . $e->getMessage() . "</p>";
+}
+?>
+
 <div id="editar" class="form-container">
     <?php if (isset($flor)): ?> 
     <form method="post" action="">
@@ -228,12 +222,12 @@ if (isset($error)) {
         <input type="submit" value="Insertar">
     </form>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/noty@3.1.4/lib/noty.js"></script>
 
 <script>
-
 toastr.success('La operación se realizó correctamente', 'Éxito');
 new Noty({
   text: 'La operación se realizó correctamente',
@@ -241,8 +235,8 @@ new Noty({
   layout: 'topRight',
   timeout: 3000
 }).show();
-
 </script>
+
 <div id="alert-container"></div>
 
 <script>
@@ -276,7 +270,6 @@ document.addEventListener("DOMContentLoaded", function() {
     <?php endif; ?>
 });
 </script>
-
 
 </body>
 </html>

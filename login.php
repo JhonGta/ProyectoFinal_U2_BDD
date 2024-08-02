@@ -10,6 +10,7 @@ $dsn = "pgsql:host=$host;port=5432;dbname=$db;user=$user;password=$password";
 
 try {
     $pdo = new PDO($dsn);
+    $error = '';
 
     // Procesar el formulario de inicio de sesión
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -27,11 +28,11 @@ try {
             header('Location: inicio1.html');
             exit;
         } else {
-            echo "<p>Nombre de usuario o contraseña incorrectos.</p>";
+            $error = 'Nombre de usuario o contraseña incorrectos.';
         }
     }
 } catch (PDOException $e) {
-    echo "<p>Error: " . $e->getMessage() . "</p>";
+    $error = "Error: " . $e->getMessage();
 }
 ?>
 <!DOCTYPE html>
@@ -40,13 +41,23 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/styl.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Login</title>
 </head>
 <body>
-    
+    <?php if (!empty($error)): ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: '<?php echo $error; ?>'
+            });
+        </script>
+    <?php endif; ?>
+
     <form method="post" action="">
-    <h2>Iniciar sesión</h2>
-    <br>
+        <h2>Iniciar sesión</h2>
+        <br>
         <label for="username">Nombre de Usuario:</label>
         <input type="text" id="username" name="username" required>
         <br>

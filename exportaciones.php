@@ -68,8 +68,6 @@ try {
     $pdo = new PDO($dsn);
 
     if ($pdo) {
-        echo "<p>Conexión exitosa a la base de datos $db!</p>";
-
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (isset($_POST['update_id'])) {
                 // Manejar la actualización
@@ -84,9 +82,9 @@ try {
                     $stmt_update = $pdo->prepare($sql_update);
                     $stmt_update->execute([':produccion_id' => $produccion_id, ':fecha' => $fecha, ':destino_id' => $destino_id, ':precio_total' => $precio_total, ':id' => $update_id]);
 
-                    echo "<p>Exportación actualizada con éxito!</p>";
+                    echo "<div class='alert alert-success'>Exportación actualizada con éxito!</div>";
                 } else {
-                    echo "<p>Error: Por favor, completa todos los campos del formulario.</p>";
+                    echo "<div class='alert alert-error'>Error: Por favor, completa todos los campos del formulario.</div>";
                 }
             } else {
                 // Manejar la inserción
@@ -95,7 +93,6 @@ try {
                 $destino_id = isset($_POST['destino_id']) ? $_POST['destino_id'] : null;
                 $precio_total = isset($_POST['precio_total']) ? $_POST['precio_total'] : null;
 
-                // Validar que precio_total sea numérico y no esté vacío
                 if ($produccion_id && $fecha && $destino_id && !empty($precio_total) && is_numeric($precio_total)) {
                     // Insertar en la tabla exportaciones
                     $sql_insert = "INSERT INTO exportaciones (produccion_id, fecha, destino_id, precio_total) VALUES (:produccion_id, :fecha, :destino_id, :precio_total)";
@@ -107,9 +104,9 @@ try {
                     $stmt_update = $pdo->prepare($sql_update);
                     $stmt_update->execute([':produccion_id' => $produccion_id]);
 
-                    echo "<p>Datos insertados con éxito!</p>";
+                    echo "<div class='alert alert-success'>Datos insertados con éxito!</div>";
                 } else {
-                    echo "<p>Error: Precio total no válido.</p>";
+                    echo "<div class='alert alert-error'>Error: Precio total no válido.</div>";
                 }
             }
         }
@@ -123,91 +120,124 @@ try {
             $exportacion = $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
-        echo "<h2>" . (isset($exportacion) ? "Editar Exportación" : "Insertar Nueva Exportación") . "</h2>";
-        echo "<form method=\"post\" action=\"\">";
+        ?>
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Gestión de Exportaciones</title>
+            <link rel="stylesheet" href="esti.css">
+        </head>
+        <body>
+            <div class="form-container">
+                <h2><?php echo isset($exportacion) ? "Editar Exportación" : "Insertar Nueva Exportación"; ?></h2>
+                <form method="post" action="">
+                    <?php if (isset($exportacion)): ?>
+                        <input type="hidden" name="update_id" value="<?php echo htmlspecialchars($exportacion['id']); ?>">
+                    <?php endif; ?>
+                    <label for="produccion_id">Producción:</label>
+                    <select id="produccion_id" name="produccion_id" onchange="actualizarPrecioTotal()" required>
+                        <?php
+                        try {
+                            $stmt = $pdo->query("SELECT produccion.id, flores.nombre AS flor, produccion.cantidad, flores.precio_unitario
+                                                 FROM produccion
+                                                 JOIN cosechas ON produccion.cosecha_id = cosechas.id
+                                                 JOIN flores ON cosechas.flor_id = flores.id
+                                                 WHERE produccion.estado = 'Para exportación'");
+                            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                $selected = isset($exportacion) && $row['id'] == $exportacion['produccion_id'] ? 'selected' : '';
+                                echo "<option value=\"" . htmlspecialchars($row['id']) . "\" data-precio=\"" . htmlspecialchars($row['precio_unitario']) . "\" data-cantidad=\"" . htmlspecialchars($row['cantidad']) . "\" $selected>" . htmlspecialchars($row['flor']) . " - " . htmlspecialchars($row['cantidad']) . " unidades</option>";
+                            }
+                        } catch (PDOException $e) {
+                            echo "<option>Error: " . $e->getMessage() . "</option>";
+                        }
+                        ?>
+                    </select>
+                    <br>
+                    <label for="fecha">Fecha:</label>
+                    <input type="date" id="fecha" name="fecha" value="<?php echo isset($exportacion) ? htmlspecialchars($exportacion['fecha']) : ''; ?>" required>
+                    <br>
+                    <label for="destino_id">Destino:</label>
+                    <select id="destino_id" name="destino_id" required>
+                        <?php
+                        try {
+                            $stmt = $pdo->query("SELECT p.id, pi.nombre FROM pais p JOIN pais_info pi ON p.id = pi.pais_id");
+                            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                $selected = isset($exportacion) && $row['id'] == $exportacion['destino_id'] ? 'selected' : '';
+                                echo "<option value=\"" . htmlspecialchars($row['id']) . "\" $selected>" . htmlspecialchars($row['nombre']) . "</option>";
+                            }
+                        } catch (PDOException $e) {
+                            echo "<option>Error: " . $e->getMessage() . "</option>";
+                        }
+                        ?>
+                    </select>
+                    <br>
+                    <label for="precio_total">Precio Total:</label>
+                    <input type="text" id="precio_total" name="precio_total" value="<?php echo isset($exportacion) ? htmlspecialchars($exportacion['precio_total']) : ''; ?>" readonly>
+                    <br>
+                    <input type="submit" value="<?php echo isset($exportacion) ? "Actualizar" : "Insertar"; ?>">
+                </form>
+            </div>
 
-        if (isset($exportacion)) {
-            echo "<input type=\"hidden\" name=\"update_id\" value=\"" . htmlspecialchars($exportacion['id']) . "\">";
-        }
+            <h2>Exportaciones Registradas</h2>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Fecha</th>
+                    <th>Destino</th>
+                    <th>Cantidad</th>
+                    <th>Flor</th>
+                    <th>Precio Total</th>
+                    <th>Acciones</th>
+                </tr>
+                <?php
+                $stmt = $pdo->query("SELECT ex.id, ex.fecha, pi.nombre AS pais_destino, pr.cantidad, fl.nombre AS flor, ex.precio_total
+                                    FROM exportaciones ex
+                                    JOIN produccion pr ON ex.produccion_id = pr.id
+                                    JOIN cosechas co ON pr.cosecha_id = co.id
+                                    JOIN flores fl ON co.flor_id = fl.id
+                                    JOIN pais p ON ex.destino_id = p.id
+                                    JOIN pais_info pi ON p.id = pi.pais_id");
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    echo "<tr>";
+                    echo "<td>" . htmlspecialchars($row['id']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['fecha']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['pais_destino']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['cantidad']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['flor']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['precio_total']) . "</td>";
+                    echo "<td>";
+                    echo "<div class='action-buttons'>";
+                    echo "<form method=\"post\" action=\"\" style=\"display:inline-block;\">";
+                    echo "<input type=\"hidden\" name=\"edit_id\" value=\"" . htmlspecialchars($row['id']) . "\">";
+                    echo "<input type=\"submit\" value=\"Editar\">";
+                    echo "</form>";
+                    echo "</div>";
+                    echo "</td>";
+                    echo "</tr>";
+                }
+                ?>
+            </table>
 
-        echo "<label for=\"produccion_id\">Producción:</label>";
-        echo "<select id=\"produccion_id\" name=\"produccion_id\" onchange=\"actualizarPrecioTotal()\" required>";
-        try {
-            $stmt = $pdo->query("SELECT produccion.id, flores.nombre AS flor, produccion.cantidad, flores.precio_unitario
-                                 FROM produccion
-                                 JOIN cosechas ON produccion.cosecha_id = cosechas.id
-                                 JOIN flores ON cosechas.flor_id = flores.id
-                                 WHERE produccion.estado = 'Para exportación'");
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $selected = isset($exportacion) && $row['id'] == $exportacion['produccion_id'] ? 'selected' : '';
-                echo "<option value=\"" . htmlspecialchars($row['id']) . "\" data-precio=\"" . htmlspecialchars($row['precio_unitario']) . "\" data-cantidad=\"" . htmlspecialchars($row['cantidad']) . "\" $selected>" . htmlspecialchars($row['flor']) . " - " . htmlspecialchars($row['cantidad']) . " unidades</option>";
-            }
-        } catch (PDOException $e) {
-            echo "<option>Error: " . $e->getMessage() . "</option>";
-        }
-        echo "</select>";
-        echo "<br>";
-
-        echo "<label for=\"fecha\">Fecha:</label>";
-        $fecha_value = isset($exportacion) ? htmlspecialchars($exportacion['fecha']) : '';
-        echo "<input type=\"date\" id=\"fecha\" name=\"fecha\" value=\"$fecha_value\" required>";
-        echo "<br>";
-
-        // Obtener datos de la tabla pais para llenar el campo destino
-        echo "<label for=\"destino_id\">Destino:</label>";
-        echo "<select id=\"destino_id\" name=\"destino_id\" required>";
-        try {
-            $stmt = $pdo->query("SELECT p.id, pi.nombre FROM pais p JOIN pais_info pi ON p.id = pi.pais_id");
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $selected = isset($exportacion) && $row['id'] == $exportacion['destino_id'] ? 'selected' : '';
-                echo "<option value=\"" . htmlspecialchars($row['id']) . "\" $selected>" . htmlspecialchars($row['nombre']) . "</option>";
-            }
-        } catch (PDOException $e) {
-            echo "<option>Error: " . $e->getMessage() . "</option>";
-        }
-        echo "</select>";
-        echo "<br>";
-
-        $precio_total_value = isset($exportacion) ? htmlspecialchars($exportacion['precio_total']) : '';
-        echo "<label for=\"precio_total\">Precio Total:</label>";
-        echo "<input type=\"text\" id=\"precio_total\" name=\"precio_total\" value=\"$precio_total_value\" readonly>";
-        echo "<br>";
-
-        echo "<input type=\"submit\" value=\"" . (isset($exportacion) ? "Actualizar" : "Insertar") . "\">";
-        echo "</form>";
-
-        // Mostrar la tabla de exportaciones
-        $stmt = $pdo->query("SELECT ex.id, ex.fecha, pi.nombre AS pais_destino, pr.cantidad, fl.nombre AS flor, ex.precio_total
-        FROM exportaciones ex
-        JOIN produccion pr ON ex.produccion_id = pr.id
-        JOIN cosechas co ON pr.cosecha_id = co.id
-        JOIN flores fl ON co.flor_id = fl.id
-        JOIN pais p ON ex.destino_id = p.id
-        JOIN pais_info pi ON p.id = pi.pais_id");
-
-        echo "<h2>Exportaciones Registradas</h2>";
-        echo "<table>";
-        echo "<tr><th>ID</th><th>Fecha</th><th>Destino</th><th>Cantidad</th><th>Flor</th><th>Precio Total</th><th>Acciones</th></tr>";
-
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            echo "<tr>";
-            echo "<td>" . htmlspecialchars($row['id']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['fecha']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['pais_destino']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['cantidad']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['flor']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['precio_total']) . "</td>";
-            echo "<td>";
-            echo "<form method=\"post\" action=\"\" style=\"display:inline-block;\">";
-            echo "<input type=\"hidden\" name=\"edit_id\" value=\"" . htmlspecialchars($row['id']) . "\">";
-            echo "<input type=\"submit\" value=\"Editar\">";
-            echo "</form>";
-            echo "</td>";
-            echo "</tr>";
-        }
-
-        echo "</table>";
-
+            <script>
+                function actualizarPrecioTotal() {
+                    var select = document.getElementById('produccion_id');
+                    var option = select.options[select.selectedIndex];
+                    var precio = option.getAttribute('data-precio');
+                    var cantidad = option.getAttribute('data-cantidad');
+                    var precioTotal = precio * cantidad;
+                    document.getElementById('precio_total').value = precioTotal.toFixed(2);
+                }
+                document.addEventListener('DOMContentLoaded', function () {
+                    if (document.getElementById('produccion_id')) {
+                        actualizarPrecioTotal();
+                    }
+                });
+            </script>
+        </body>
+        </html>
+        <?php
     }
 } catch (PDOException $e) {
     echo "<p>Error: " . $e->getMessage() . "</p>";

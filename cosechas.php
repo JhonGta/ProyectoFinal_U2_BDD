@@ -246,8 +246,5 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <p>&copy; 2024 Florería Elegante. Todos los derechos reservados.</p>
-    </footer>
 </body>
 </html>
