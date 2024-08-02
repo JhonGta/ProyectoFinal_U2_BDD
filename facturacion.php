@@ -163,6 +163,7 @@ try {
                     } catch (PDOException $e) {
                         echo "<option>Error: " . $e->getMessage() . "</option>";
                     }
+                    
                     ?>
                 </select>
                 <br>

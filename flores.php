@@ -27,7 +27,6 @@
             <li><a href="facturacion.php">Facturación</a></li>
         </ul>
     </nav>
-
     </header>
 
     <?php

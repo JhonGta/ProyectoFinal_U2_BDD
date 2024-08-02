@@ -18,6 +18,7 @@
             document.getElementById("precio_total").value = "";
         }
     }
+    
     </script>
 </head>
 <body>

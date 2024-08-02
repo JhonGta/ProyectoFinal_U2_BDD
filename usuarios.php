@@ -6,7 +6,6 @@ if (!isset($_SESSION['username'])) {
     header('Location: login.php');
     exit;
 }
-
 // Verifica el rol del usuario
 $role = $_SESSION['role'];
 if ($role != 'usuario_admin') {
