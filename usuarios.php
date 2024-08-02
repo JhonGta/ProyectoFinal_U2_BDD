@@ -6,6 +6,7 @@ if (!isset($_SESSION['username'])) {
     header('Location: login.php');
     exit;
 }
+
 // Verifica el rol del usuario
 $role = $_SESSION['role'];
 if ($role != 'usuario_admin') {
@@ -46,37 +47,6 @@ try {
 
     // Obtener todos los usuarios
     $stmt = $pdo->query("SELECT * FROM public.usuarios");
-
-    // Mostrar usuarios en tabla
-    echo "<h2>Administrar Usuarios</h2>";
-    echo "<form method='post' action=''>";
-    echo "<label for='username'>Nombre de Usuario:</label>";
-    echo "<input type='text' id='username' name='username' required>";
-    echo "<label for='password'>Contraseña:</label>";
-    echo "<input type='password' id='password' name='password' required>";
-    echo "<label for='role'>Rol:</label>";
-    echo "<select id='role' name='role'>";
-    echo "<option value='usuario_admin'>Administrador</option>";
-    echo "<option value='usuario_ventas'>Ventas</option>";
-    echo "<option value='usuario_produccion'>Producción</option>";
-    echo "</select>";
-    echo "<input type='submit' name='action' value='add' />";
-    echo "</form>";
-
-    echo "<h3>Usuarios Existentes</h3>";
-    echo "<table>";
-    echo "<thead><tr><th>Nombre de Usuario</th><th>Rol</th><th>Acciones</th></tr></thead>";
-    echo "<tbody>";
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        echo "<tr>";
-        echo "<td>" . htmlspecialchars($row['username']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['role']) . "</td>";
-        echo "<td><form method='post' action='' style='display:inline;'><input type='hidden' name='username' value='" . htmlspecialchars($row['username']) . "'><input type='submit' name='action' value='delete'></form></td>";
-        echo "</tr>";
-    }
-    echo "</tbody>";
-    echo "</table>";
-
 } catch (PDOException $e) {
     echo "<p>Error: " . $e->getMessage() . "</p>";
 }
@@ -88,10 +58,69 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administrar Usuarios</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styleUser.css">
 </head>
 <body>
-    <h2>Administrar Usuarios</h2>
-    <!-- El formulario y la tabla de usuarios ya están en el bloque PHP -->
+    <header class="header">
+        <div class="logo">
+            <img src="img/logo.png" alt="Florería Elegante">
+        </div>
+        <nav class="nav">
+            <ul>
+                <li><a href="inicio1.html">Inicio</a></li>
+                <li><a href="flores.php">Flores</a></li>
+                <li><a href="cosechas.php">Cosechas</a></li>
+                <li><a href="produccion.php">Producción</a></li>
+                <li><a href="exportaciones.php">Exportaciones</a></li>
+                <li><a href="empleados.php">Empleados</a></li>
+                <?php if ($role == 'usuario_admin') : ?>
+                    <li><a href="usuarios.php">Usuarios</a></li>
+                <?php endif; ?>
+                <li><a href="logout.php">Salir</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h2>Administrar Usuarios</h2>
+        <form method="post" action="">
+            <label for="username">Nombre de Usuario:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
+            <label for="role">Rol:</label>
+            <select id="role" name="role">
+                <option value="usuario_admin">Administrador</option>
+                <option value="usuario_ventas">Ventas</option>
+                <option value="usuario_produccion">Producción</option>
+            </select>
+            <input type="submit" name="action" value="add" />
+        </form>
+
+        <h3>Usuarios Existentes</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre de Usuario</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) : ?>
+                    <tr>
+                        <td><?= htmlspecialchars($row['username']) ?></td>
+                        <td><?= htmlspecialchars($row['role']) ?></td>
+                        <td>
+                            <form method="post" action="" style="display:inline;">
+                                <input type="hidden" name="username" value="<?= htmlspecialchars($row['username']) ?>">
+                                <input type="submit" name="action" value="delete">
+                            </form>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

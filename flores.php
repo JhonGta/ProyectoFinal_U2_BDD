@@ -16,7 +16,6 @@
     </div>
     <nav class="nav">
         <ul>
-            <li><a href="logout.php">Salir</a></li>
             <li><a href="inicio1.html">Inicio</a></li>
             <li><a href="flores.php">Flores</a></li>
             <li><a href="cosechas.php">Cosechas</a></li>
@@ -24,6 +23,7 @@
             <li><a href="exportaciones.php">Exportaciones</a></li>
             <li><a href="empleados.php">Empleados</a></li>
             <li><a href="facturacion.php">Facturación</a></li>
+            <li><a href="logout.php">Salir</a></li>
         </ul>
     </nav>
 </header>

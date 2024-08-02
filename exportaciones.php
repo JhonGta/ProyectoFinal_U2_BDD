@@ -22,6 +22,7 @@
     </script>
 </head>
 <body>
+    <br>
     <h2>Exportaciones</h2>
     <header class="header">
         <div class="logo">
